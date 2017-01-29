@@ -5,17 +5,18 @@ import glob
 import numpy as np
 import skimage.io as io
 
-np.set_printoptions(precision=15)
-
 files = glob.glob(os.path.join(sys.argv[1], "*.png"))
 nfiles = len(files)
 
 lbl_counts = {}
 
 for f in files:
-    img = io.imread(f)[:,:,0] # first channel of gray label image
+    img = io.imread(f)
+    if img.ndim>2 and img.shape[2]>1:
+        img = img[:,:,0] # first channel of gray label image
+
     id, counts = np.unique(img, return_counts=True)
-    # normalize on image
+    # normalize by total classes in image
     counts = counts / float(sum(counts))
     for i in range(len(id)):
         if id[i] in lbl_counts.keys():
@@ -23,7 +24,7 @@ for f in files:
         else:
             lbl_counts[id[i]] = counts[i]
 
-# normalize on training set
+# normalize by images in training set
 for k in lbl_counts:
     lbl_counts[k] /= nfiles
 
@@ -48,8 +49,7 @@ print "##########################"
 # class weight for classes that are not present in labeled image
 missing_class_weight = 100000
 
-#max_class_id = np.max(lbl_weights.keys())+1
-max_class_id = 60
+max_class_id = np.max(lbl_weights.keys())
 
 # print formated output for caffe prototxt
 print "########################################################"
@@ -59,7 +59,7 @@ print\
 "  loss_param: {\n"\
 "    weight_by_label_freqs: true"\
 #"\n    ignore_label: 0"
-for k in range(max_class_id):
+for k in range(max_class_id+1):
     if k in lbl_weights:
         print "    class_weighting:", lbl_weights[k]
     else:
