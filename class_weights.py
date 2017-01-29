@@ -9,6 +9,7 @@ files = glob.glob(os.path.join(sys.argv[1], "*.png"))
 nfiles = len(files)
 
 lbl_counts = {}
+lbl_presence = {} # dict, store number of images where class is present
 
 for f in files:
     img = io.imread(f)
@@ -19,6 +20,11 @@ for f in files:
     # normalize by total classes in image
     counts = counts / float(sum(counts))
     for i in range(len(id)):
+        if id[i] in lbl_presence.keys():
+            lbl_presence[id[i]] += 1
+        else:
+            lbl_presence[id[i]] = 1
+
         if id[i] in lbl_counts.keys():
             lbl_counts[id[i]] += counts[i]
         else:
@@ -26,7 +32,7 @@ for f in files:
 
 # normalize by images in training set
 for k in lbl_counts:
-    lbl_counts[k] /= nfiles
+    lbl_counts[k] /= lbl_presence[k]
 
 print "##########################"
 print "class probability:"
