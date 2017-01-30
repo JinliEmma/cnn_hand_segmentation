@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# convert gray into colour labels
+# ./label_colour_conversion.py <path_to_files> <path_to_colour_map> <file_pattern>
+
 import sys, os
 import glob
 import csv
@@ -39,7 +42,12 @@ for line in linkfile:
 colours[0] = [0, 0, 0]
 
 # convert files in parallel
-pred_files = sorted(glob.glob(os.path.join(sys.argv[1], "pred_*.png")))
+if len(sys.argv)<4:
+    file_pattern = "pred_*.png"
+else:
+    file_pattern = sys.argv[3]
+
+pred_files = sorted(glob.glob(os.path.join(sys.argv[1], file_pattern)))
 num_cores = multiprocessing.cpu_count()
 # start in parallel
 Parallel(n_jobs=num_cores)(delayed(label_to_colour)(f) for f in pred_files)
