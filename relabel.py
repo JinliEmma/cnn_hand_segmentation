@@ -6,6 +6,7 @@ import sys, os
 import glob
 import skimage.io as io
 import numpy as np
+import csv
 
 import warnings
 
@@ -22,16 +23,17 @@ for f in files:
 
     labels.update(ids)
 
-print labels
-
 labels = sorted(labels)
 
-print labels
-
+# map labels from original label to collapsed label
 label_map = dict()
-
 for i in range(len(labels)):
     label_map[labels[i]] = i
+
+base_folder = os.path.split(os.path.normpath(sys.argv[1]))[0]
+csvwriter = csv.writer(open(os.path.join(base_folder, "label_map.csv"), 'w'), delimiter=' ')
+for k,v in label_map.iteritems():
+    csvwriter.writerow([k,v])
 
 print label_map
 
